@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       triggerValue,
     },
   });
-  await scheduleAlert(alert.id);
+  // Schedule the alert if Redis is available (catch any errors)
+  await scheduleAlert(alert.id).catch(() => {});
   return NextResponse.json(alert);
 }
