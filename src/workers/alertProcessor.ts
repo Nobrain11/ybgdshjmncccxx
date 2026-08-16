@@ -6,7 +6,7 @@ import { getTokenData } from '@/services/market';
 const redis = getRedisClient();
 if (!redis) {
   console.warn('⚠️ Redis not available – alert processor not starting');
-  process.exit(0); // This will prevent the worker from running, but it's fine.
+  process.exit(0);
 }
 
 const alertWorker = new Worker('alerts', async job => {
