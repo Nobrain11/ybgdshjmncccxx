@@ -38,8 +38,15 @@ function TokenCard({ token }: { token: any }) {
         </div>
       </div>
 
-      <div className="mx-4 h-12 border-b border-brand/30 bg-gradient-to-b from-brand/15 to-transparent">
+      <div className="mx-4 h-10 border-y border-brand/30 bg-gradient-to-b from-brand/15 to-transparent">
         <div className="h-full border-t-2 border-brand" />
+      </div>
+
+      <div className="grid grid-cols-4 divide-x divide-border border-b border-border text-center">
+        <div className="p-2.5"><p className="text-[10px] font-bold text-muted">MCAP</p><p className="mt-1 text-sm font-semibold">{money(token.marketCap)}</p></div>
+        <div className="p-2.5"><p className="text-[10px] font-bold text-muted">LIQ</p><p className="mt-1 text-sm font-semibold">{money(token.liquidity?.usd)}</p></div>
+        <div className="p-2.5"><p className="text-[10px] font-bold text-muted">VOL</p><p className="mt-1 text-sm font-semibold">{money(token.volume?.h24)}</p></div>
+        <div className="p-2.5"><p className="text-[10px] font-bold text-muted">AGE</p><p className="mt-1 text-sm font-semibold">{token.pairCreatedAt ? `${Math.max(1, Math.floor((Date.now() - token.pairCreatedAt) / 86400000))}d` : '—'}</p></div>
       </div>
 
       <div className="grid grid-cols-4 divide-x divide-border border-b border-border text-center">
@@ -49,10 +56,10 @@ function TokenCard({ token }: { token: any }) {
         <div className="p-3"><p className="text-[11px] font-bold text-muted">AGE</p><p className="mt-1 font-semibold">{token.pairCreatedAt ? `${Math.max(1, Math.floor((Date.now() - token.pairCreatedAt) / 86400000))}d` : '—'}</p></div>
       </div>
 
-      <div className="p-4">
-        <div className="mb-3 flex items-center justify-between text-sm"><span className="font-semibold text-brand">B {Math.round(token.txns?.h24?.buys || 0).toLocaleString()}</span><span className="text-muted">24h pressure</span><span className="font-semibold text-danger">S {Math.round(token.txns?.h24?.sells || 0).toLocaleString()}</span></div>
-        <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-danger/20"><div className="h-full w-2/3 rounded-full bg-brand" /></div>
-        <button className="w-full rounded-xl bg-brand px-4 py-3 text-base font-bold text-black transition hover:brightness-110">Quick Buy</button>
+      <div className="p-3">
+        <div className="mb-2 flex items-center justify-between text-xs"><span className="font-semibold text-brand">B {Math.round(token.txns?.h24?.buys || 0).toLocaleString()}</span><span className="text-muted">24h pressure</span><span className="font-semibold text-danger">S {Math.round(token.txns?.h24?.sells || 0).toLocaleString()}</span></div>
+        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-danger/20"><div className="h-full w-2/3 rounded-full bg-brand" /></div>
+        <button className="w-full rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-black transition hover:brightness-110">Quick Buy</button>
       </div>
     </article>
   );

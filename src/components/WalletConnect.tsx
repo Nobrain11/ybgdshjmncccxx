@@ -71,15 +71,15 @@ export default function WalletConnect({ compact = false }: { compact?: boolean }
   }, []);
 
   if (address) {
-    return <div className={compact ? 'rounded-xl border border-brand/30 bg-brand/10 px-3 py-2 text-xs font-bold text-brand' : 'space-y-2'}>
-      <div className="flex items-center justify-between gap-3"><span>{shortAddress(address)}</span><span className="text-[10px] text-muted">{chainId ? `CHAIN ${parseInt(chainId, 16)}` : 'CONNECTED'}</span></div>
+    return <div className={compact ? 'rounded-xl border border-brand/30 bg-brand/10 px-2.5 py-2 text-xs font-bold text-brand' : 'space-y-2'}>
+      <div className="flex items-center gap-2"><span className="size-2 rounded-full bg-brand" aria-hidden="true" /><span>{shortAddress(address)}</span><span className="text-[10px] text-muted">{chainId ? `CHAIN ${parseInt(chainId, 16)}` : 'CONNECTED'}</span></div>
     </div>;
   }
 
-  return <div className={compact ? '' : 'space-y-2'}>
-    <button onClick={connect} disabled={status === 'connecting'} className="w-full rounded-xl bg-brand px-4 py-3 font-black text-black transition hover:brightness-110 disabled:opacity-50">
-      {status === 'connecting' ? 'Connecting…' : 'Connect Robinhood Wallet'}
+  return <div className={compact ? 'relative' : 'space-y-2'}>
+    <button onClick={connect} disabled={status === 'connecting'} className={compact ? 'rounded-xl border border-brand/50 bg-brand px-3 py-2 text-xs font-black text-black transition hover:brightness-110 disabled:opacity-50' : 'w-full rounded-xl bg-brand px-4 py-3 font-black text-black transition hover:brightness-110 disabled:opacity-50'}>
+      {status === 'connecting' ? 'Connecting…' : compact ? 'Connect wallet' : 'Connect Robinhood Wallet'}
     </button>
-    {error ? <p role="alert" className="text-xs leading-5 text-danger">{error}</p> : null}
+    {error ? <p role="alert" className={compact ? 'absolute right-0 top-12 z-20 w-56 rounded-xl border border-danger/30 bg-background p-3 text-xs leading-5 text-danger shadow-2xl' : 'text-xs leading-5 text-danger'}>{error}</p> : null}
   </div>;
 }
