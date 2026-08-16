@@ -2,8 +2,13 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  // serverActions is enabled by default — remove it from experimental
   experimental: {
-    serverActions: true,
+    turbo: {
+      resolveAlias: {
+        '@': './src',
+      },
+    },
   },
 };
 
