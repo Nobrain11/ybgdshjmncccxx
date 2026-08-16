@@ -4,19 +4,31 @@ import { prisma } from '@/lib/prisma';
 const DEXSCREENER_API = 'https://api.dexscreener.com/latest/dex';
 
 export async function getTokenData(address: string) {
-  const cached = await redis.get(`token:${address}`);
-  if (cached) return JSON.parse(cached);
+  // Check if Redis is available
+  let cached = null;
+  if (redis) {
+    cached = await redis.get(`token:${address}`);
+    if (cached) return JSON.parse(cached);
+  }
+
   const res = await fetch(`${DEXSCREENER_API}/tokens/${address}`);
   if (!res.ok) throw new Error('Token not found');
   const data = await res.json();
   const pair = data.pairs?.find((p: any) => p.chainId === 'robinhood');
   if (!pair) throw new Error('No Robinhood pair found');
-  await redis.setex(`token:${address}`, 15, JSON.stringify(pair));
+
+  // Cache in Redis if available
+  if (redis) {
+    await redis.setex(`token:${address}`, 15, JSON.stringify(pair));
+  }
+
+  // Always store in DB for persistence
   await prisma.tokenCache.upsert({
     where: { address },
     update: { data: pair, updatedAt: new Date() },
     create: { address, data: pair },
   });
+
   return pair;
 }
 
@@ -27,11 +39,8 @@ export async function searchTokens(query: string) {
 }
 
 export async function getTrending() {
-  // This is a placeholder – you'd compute a score from multiple tokens
-  // For demo, fetch from a list of known tokens or from DexScreener search
   const res = await fetch(`${DEXSCREENER_API}/search?q=ETH`);
   const data = await res.json();
   const pairs = data.pairs?.filter((p: any) => p.chainId === 'robinhood') || [];
-  // Sort by volume, liquidity, etc.
   return pairs.slice(0, 20);
 }
