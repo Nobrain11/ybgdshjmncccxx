@@ -2,41 +2,34 @@ import { Worker } from 'bullmq';
 import { getRedisClient } from '@/lib/redis';
 import { prisma } from '@/lib/prisma';
 import { getTokenData } from '@/services/market';
-import { getWallet } from '@/services/wallet';
-import { executeTrade } from '@/services/trading';
 
 const redis = getRedisClient();
 
-if (!redis) {
-  console.warn('⚠️ Redis not available – order processor not starting');
-  // Export a dummy to avoid breaking imports
-  export default null;
-} else {
-  const orderWorker = new Worker('orders', async job => {
-    const order = await prisma.order.findUnique({ where: { id: job.data.orderId } });
-    if (!order || order.status !== 'OPEN') return;
+let alertWorker: Worker | null = null;
+
+if (redis) {
+  alertWorker = new Worker('alerts', async job => {
+    const alert = await prisma.alert.findUnique({ where: { id: job.data.alertId } });
+    if (!alert || !alert.active) return;
     try {
-      const tokenData = await getTokenData(order.tokenAddress);
-      const currentPrice = parseFloat(tokenData.priceUsd);
-      let shouldExecute = false;
-      if (order.type === 'LIMIT_BUY' && currentPrice <= order.price) shouldExecute = true;
-      if (order.type === 'LIMIT_SELL' && currentPrice >= order.price) shouldExecute = true;
-      if (shouldExecute) {
-        const wallet = await getWallet(order.userId);
-        if (!wallet) throw new Error('Wallet not found');
-        const isBuy = order.side === 'BUY';
-        const amount = order.amount.toString();
-        const tx = await executeTrade(order.tokenAddress, amount, isBuy, wallet.privateKey);
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { status: 'FILLED', executedAt: new Date(), filledAmount: order.amount },
+      const token = await getTokenData(alert.tokenAddress);
+      const price = parseFloat(token.priceUsd);
+      let triggered = false;
+      if (alert.type === 'PRICE_ABOVE' && price >= alert.triggerValue) triggered = true;
+      if (alert.type === 'PRICE_BELOW' && price <= alert.triggerValue) triggered = true;
+      if (triggered) {
+        await prisma.alert.update({
+          where: { id: alert.id },
+          data: { triggeredAt: new Date(), active: false },
         });
-        console.log(`Order ${order.id} executed: ${tx.hash}`);
+        console.log(`Alert triggered for user ${alert.userId}: ${alert.tokenAddress} at $${price}`);
       }
     } catch (e) {
-      console.error('Order execution error:', e);
+      console.error('Alert check error:', e);
     }
   }, { connection: redis });
-
-  export default orderWorker;
+} else {
+  console.warn('⚠️ Redis not available – alert processor not starting');
 }
+
+export default alertWorker;
