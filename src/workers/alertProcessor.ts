@@ -5,11 +5,10 @@ import { getTokenData } from '@/services/market';
 
 const redis = getRedisClient();
 
-if (!redis) {
-  console.warn('⚠️ Redis not available – alert processor not starting');
-  export default null;
-} else {
-  const alertWorker = new Worker('alerts', async job => {
+let alertWorker: Worker | null = null;
+
+if (redis) {
+  alertWorker = new Worker('alerts', async job => {
     const alert = await prisma.alert.findUnique({ where: { id: job.data.alertId } });
     if (!alert || !alert.active) return;
     try {
@@ -29,6 +28,8 @@ if (!redis) {
       console.error('Alert check error:', e);
     }
   }, { connection: redis });
-
-  export default alertWorker;
+} else {
+  console.warn('⚠️ Redis not available – alert processor not starting');
 }
+
+export default alertWorker;
