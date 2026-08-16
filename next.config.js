@@ -1,14 +1,13 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  // serverActions is enabled by default — remove it from experimental
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        '@': './src',
-      },
-    },
+  // Add Webpack alias to resolve @/ to src/
+  webpack: (config) => {
+    config.resolve.alias['@'] = path.join(__dirname, 'src');
+    return config;
   },
 };
 
