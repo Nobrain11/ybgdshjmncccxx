@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  wallets       Wallet[]
+  alerts        Alert[]
+  orders        Order[]
+  watchlist     WatchlistItem[]
+}
+
+model Wallet {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address     String   @unique
+  encryptedKey String?  // encrypted private key
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Alert {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenAddress  String
+  type          String   // PRICE_ABOVE, PRICE_BELOW, VOLUME_SPIKE, WHALE_TX
+  triggerValue  Float
+  currentValue  Float?
+  active        Boolean  @default(true)
+  triggeredAt   DateTime?
+  createdAt     DateTime @default(now())
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenAddress  String
+  type          String   // LIMIT_BUY, LIMIT_SELL, STOP_LOSS, TAKE_PROFIT, DCA
+  side          String   // BUY, SELL
+  price         Float
+  amount        Float
+  filledAmount  Float    @default(0)
+  status        String   // OPEN, FILLED, CANCELLED, PARTIALLY_FILLED
+  executedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model WatchlistItem {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenAddress String
+  createdAt   DateTime @default(now())
+  @@unique([userId, tokenAddress])
+}
+
+model TokenCache {
+  address     String   @id
+  data        Json
+  updatedAt   DateTime @default(now())
+}
