@@ -1,7 +1,13 @@
 import { Worker } from 'bullmq';
-import { redis } from '@/lib/redis';
+import { getRedisClient } from '@/lib/redis';
 import { prisma } from '@/lib/prisma';
 import { getTokenData } from '@/services/market';
+
+const redis = getRedisClient();
+if (!redis) {
+  console.warn('⚠️ Redis not available – alert processor not starting');
+  process.exit(0); // This will prevent the worker from running, but it's fine.
+}
 
 const alertWorker = new Worker('alerts', async job => {
   const alert = await prisma.alert.findUnique({ where: { id: job.data.alertId } });
@@ -17,7 +23,6 @@ const alertWorker = new Worker('alerts', async job => {
         where: { id: alert.id },
         data: { triggeredAt: new Date(), active: false },
       });
-      // Optionally send email here
       console.log(`Alert triggered for user ${alert.userId}: ${alert.tokenAddress} at $${price}`);
     }
   } catch (e) {
