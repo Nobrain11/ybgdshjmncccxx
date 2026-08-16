@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-const SECRET = process.env.JWT_SECRET!;
+const SECRET = process.env.JWT_SECRET || 'fallback-secret-for-dev-dont-use-in-production';
 
 export function generateToken(userId: string) {
   return jwt.sign({ userId }, SECRET, { expiresIn: '7d' });
