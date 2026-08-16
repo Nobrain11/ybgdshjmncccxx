@@ -2,7 +2,8 @@ import { Worker } from 'bullmq';
 import { redis } from '@/lib/redis';
 import { prisma } from '@/lib/prisma';
 import { getTokenData } from '@/services/market';
-import { executeTrade, getWallet } from '@/services/wallet';
+import { getWallet } from '@/services/wallet';
+import { executeTrade } from '@/services/trading';
 
 const orderWorker = new Worker('orders', async job => {
   const order = await prisma.order.findUnique({ where: { id: job.data.orderId } });
