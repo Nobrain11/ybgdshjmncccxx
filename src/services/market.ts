@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma';
 const DEXSCREENER_API = 'https://api.dexscreener.com/latest/dex';
 
 export async function getTokenData(address: string) {
-  // Check if Redis is available
   let cached = null;
   if (redis) {
     cached = await redis.get(`token:${address}`);
@@ -17,12 +16,10 @@ export async function getTokenData(address: string) {
   const pair = data.pairs?.find((p: any) => p.chainId === 'robinhood');
   if (!pair) throw new Error('No Robinhood pair found');
 
-  // Cache in Redis if available
   if (redis) {
     await redis.setex(`token:${address}`, 15, JSON.stringify(pair));
   }
 
-  // Always store in DB for persistence
   await prisma.tokenCache.upsert({
     where: { address },
     update: { data: pair, updatedAt: new Date() },
