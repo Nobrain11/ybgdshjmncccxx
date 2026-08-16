@@ -35,7 +35,8 @@ export async function getWallet(userId: string) {
 export async function importWallet(userId: string, mnemonicOrPrivateKey: string) {
   let wallet: ethers.Wallet;
   if (mnemonicOrPrivateKey.includes(' ')) {
-    wallet = ethers.Wallet.fromPhrase(mnemonicOrPrivateKey);
+    // fromPhrase returns HDNodeWallet, but it's compatible with Wallet
+    wallet = ethers.Wallet.fromPhrase(mnemonicOrPrivateKey) as ethers.Wallet;
   } else {
     wallet = new ethers.Wallet(mnemonicOrPrivateKey);
   }
