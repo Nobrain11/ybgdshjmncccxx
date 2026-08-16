@@ -33,13 +33,16 @@ export async function getWallet(userId: string) {
 }
 
 export async function importWallet(userId: string, mnemonicOrPrivateKey: string) {
-  let wallet: ethers.Wallet;
+  let privateKey: string;
   if (mnemonicOrPrivateKey.includes(' ')) {
-    // fromPhrase returns HDNodeWallet, but it's compatible with Wallet
-    wallet = ethers.Wallet.fromPhrase(mnemonicOrPrivateKey) as ethers.Wallet;
+    // It's a mnemonic phrase → derive private key
+    const hdNode = ethers.HDNodeWallet.fromPhrase(mnemonicOrPrivateKey);
+    privateKey = hdNode.privateKey;
   } else {
-    wallet = new ethers.Wallet(mnemonicOrPrivateKey);
+    // It's a private key (hex string)
+    privateKey = mnemonicOrPrivateKey;
   }
+  const wallet = new ethers.Wallet(privateKey);
   const encrypted = encrypt(wallet.privateKey, process.env.WALLET_ENCRYPTION_KEY!);
   const dbWallet = await prisma.wallet.create({
     data: {
