@@ -15,17 +15,14 @@ export default function Terminal() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) router.push('/login');
-        else setUser(data.user);
-      });
-  }, []);
+    fetch('/api/auth/me').then((res) => res.json()).then((data) => {
+      if (data.error) router.push('/login');
+      else setUser(data.user);
+    }).catch(() => router.push('/login'));
+  }, [router]);
 
   const renderPage = () => {
     switch (activeTab) {
-      case 'discover': return <DiscoverPage />;
       case 'trade': return <TradePage />;
       case 'portfolio': return <PortfolioPage />;
       case 'alerts': return <AlertsPage />;
@@ -35,9 +32,9 @@ export default function Terminal() {
   };
 
   return (
-    <div className="min-h-screen pb-20 max-w-[430px] mx-auto">
+    <div className="mx-auto min-h-screen max-w-[430px] bg-background pb-24">
       <Header user={user} />
-      <main className="p-4">{renderPage()}</main>
+      <main className="px-4 py-4">{renderPage()}</main>
       <BottomNav active={activeTab} onChange={setActiveTab} />
     </div>
   );

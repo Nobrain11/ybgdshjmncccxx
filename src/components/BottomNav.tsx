@@ -10,15 +10,16 @@ export default function BottomNav({ active, onChange }: { active: string; onChan
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#0a0a0b] border-t border-border flex justify-around py-2 max-w-[430px] mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 mx-auto flex max-w-[430px] justify-around border-t border-border bg-background/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 backdrop-blur">
       {tabs.map(tab => (
         <button
           key={tab.key}
           onClick={() => onChange(tab.key)}
-          className="flex flex-col items-center gap-0.5"
+          aria-label={tab.label}
+          className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-2 transition ${active === tab.key ? 'bg-brand/10 text-brand' : 'text-muted'}`}
         >
-          <tab.icon className={`w-5 h-5 ${active === tab.key ? 'text-green' : 'text-text2'}`} />
-          <span className={`text-[10px] ${active === tab.key ? 'text-green' : 'text-text2'}`}>{tab.label}</span>
+          <tab.icon className="h-5 w-5" />
+          <span className="text-[10px] font-semibold">{tab.label}</span>
         </button>
       ))}
     </nav>
